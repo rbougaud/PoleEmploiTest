@@ -55,14 +55,4 @@ internal class JobOfferRepositoryWriter(WriterContext context) : IJobOfferReposi
         await transaction.CommitAsync(cancellationToken);
     }
 
-
-    public async Task AddAsync(JobOffer newOffre)
-    {
-        await _context.AddAsync(newOffre);
-    }
-
-    public async Task SaveAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
 }

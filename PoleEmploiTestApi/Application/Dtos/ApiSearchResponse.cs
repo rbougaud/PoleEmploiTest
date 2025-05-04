@@ -53,101 +53,35 @@ public record Offre(
     ContexteTravail ContexteTravail
 );
 
-public record LieuTravail(
-    string Libelle,
-    double Latitude,
-    double Longitude,
-    string CodePostal,
-    string Commune
-);
+public record LieuTravail(string Libelle, double Latitude, double Longitude, string CodePostal, string Commune);
 
-public record Entreprise(
-    string Nom,
-    string Description,
-    string Logo,
-    string Url,
-    bool EntrepriseAdaptee
-);
+public record Entreprise(string Nom, string Description, string Logo, string Url, bool EntrepriseAdaptee);
 
-public record Formation(
-    string CodeFormation,
-    string DomaineLibelle,
-    string NiveauLibelle,
-    string Commentaire,
-    string Exigence
-);
+public record Formation(string CodeFormation, string DomaineLibelle, string NiveauLibelle, string Commentaire, string Exigence);
 
-public record Langue(
-    string Libelle,
-    string Exigence
-);
+public record Langue(string Libelle, string Exigence);
 
-public record Permis(
-    string Libelle,
-    string Exigence
-);
+public record Permis(string Libelle, string Exigence);
 
-public record Competence(
-    string Code,
-    string Libelle,
-    string Exigence
-);
+public record Competence(string Code, string Libelle, string Exigence);
 
-public record Salaire(
-    string Libelle,
-    string Commentaire,
-    string Complement1,
-    string Complement2
-);
+public record Salaire(string Libelle, string Commentaire, string Complement1, string Complement2);
 
-public record Contact(
-    string Nom,
-    string Coordonnees1,
-    string Coordonnees2,
-    string Coordonnees3,
-    string Telephone,
-    string Courriel,
-    string Commentaire,
-    string UrlRecruteur,
-    string UrlPostulation
-);
+public record Contact(string Nom, string Coordonnees1, string Coordonnees2, string Coordonnees3, string Telephone, string Courriel, string Commentaire, string UrlRecruteur, string UrlPostulation);
 
-public record Agence(
-    string Telephone,
-    string Courriel
-);
+public record Agence(string Telephone, string Courriel);
 
-public record QualiteProfessionnelle(
-    string Libelle,
-    string Description
-);
+public record QualiteProfessionnelle(string Libelle, string Description);
 
-public record OrigineOffre(
-    string Origine,
-    string UrlOrigine,
-    List<Partenaire> Partenaires
-);
+public record OrigineOffre(string Origine, string UrlOrigine, List<Partenaire> Partenaires);
 
-public record Partenaire(
-    string Nom,
-    string Url,
-    string Logo
-);
+public record Partenaire(string Nom, string Url, string Logo);
 
-public record ContexteTravail(
-    string[] Horaires,
-    string[] ConditionsExercice
-);
+public record ContexteTravail(string[] Horaires, string[] ConditionsExercice);
 
-public record FiltrePossible(
-    string Filtre,
-    List<Agregation> Agregation
-);
+public record FiltrePossible(string Filtre, List<Agregation> Agregation);
 
-public record Agregation(
-    string ValeurPossible,
-    int NbResultats
-);
+public record Agregation(string ValeurPossible, int NbResultats);
 
 
 
