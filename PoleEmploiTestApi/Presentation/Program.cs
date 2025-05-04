@@ -30,7 +30,7 @@ try
             .WriteTo.Console()
             .MinimumLevel.Debug();
     });
-
+    builder.Host.ConfigurationWolverine();
     builder.Services
     .AddAuthorization()
     .AddAuthentication(x =>

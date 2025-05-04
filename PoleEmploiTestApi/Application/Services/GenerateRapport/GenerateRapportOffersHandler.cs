@@ -1,27 +1,32 @@
-﻿using Serilog;
+﻿using Infrastructure.Abstraction.Repositories;
+using Serilog;
 
 namespace Application.Services.GenerateRapport;
 
-public class GenerateRapportOffersHandler(ILogger logger)//, IJobOfferRepositoryReader)//, IJobOfferRepositoryReader repositoryReader)
+public class GenerateRapportOffersHandler(ILogger logger, IJobOfferRepositoryReader repositoryReader)
 {
     private readonly ILogger _logger = logger;
+    private readonly IJobOfferRepositoryReader _repositoryReader = repositoryReader;
 
     public async Task Handle(GenerateRapportOffersCommand command, CancellationToken cancellationToken)
     {
-        //await _reportingService.GenerateRapportAsync(cancellationToken);
+        var stats = await _repositoryReader.GetOfferStats(cancellationToken);
+        _logger.Information("{c} lines number on .txt {count}", nameof(GenerateRapportOffersHandler), stats.Count);
+        var downloadsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 
-        //var fileName = $"rapport_offres_{DateTime.UtcNow:yyyyMMddHHmmss}.txt";
-        //using var writer = new StreamWriter(fileName);
+        var fileName = $"rapport_offres_{DateTime.UtcNow:yyyyMMddHHmmss}.txt";
+        var fullPath = Path.Combine(downloadsPath, fileName);
 
-        //writer.WriteLine("Statistiques des Offres Pôle Emploi");
-        //writer.WriteLine("=====================================");
-        //foreach (var stat in stats)
-        //{
-        //    var line = $"Contrat: {stat.TypeContrat,-20} | Entreprise: {stat.Entreprise,-30} | Pays: {stat.Pays,-15} | Nombre: {stat.Nombre}";
-        //    _logger.Information(line);
-        //    writer.WriteLine(line);
-        //}
+        using var writer = new StreamWriter(fullPath);
 
-        //_logger.Information("Rapport généré avec succès : {FileName}", fileName);
+        writer.WriteLine("Statistiques des Offres Pôle Emploi");
+        writer.WriteLine("=====================================");
+        foreach (var stat in stats)
+        {
+            var line = $"Contrat: {stat.ContractType,-20} | Entreprise: {stat.Company,-30} | Pays: {stat.Country,-15} | Nombre: {stat.Count}";
+            writer.WriteLine(line);
+        }
+
+        _logger.Information("Rapport généré avec succès : {FileName}", fileName);
     }
 }

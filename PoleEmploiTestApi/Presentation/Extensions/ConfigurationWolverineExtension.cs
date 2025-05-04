@@ -15,6 +15,7 @@ internal static class ConfigurationWolverineExtension
             options.UseFluentValidation();
 
             options.Discovery.IncludeAssembly(typeof(GenerateRapportOffersHandler).Assembly);
+            //TODO RBO si besoin de rajouter des fluent validations
             //options.Services.AddValidatorsFromAssemblyContaining<GenerateRapportOffersCommand>();
         });
     }
