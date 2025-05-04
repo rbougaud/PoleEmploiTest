@@ -19,28 +19,30 @@ internal class PoleEmploiTokenService(ILogger logger, IOptions<PoleEmploiSetting
     private readonly ILogger _logger = logger;
     private readonly IDatabase _db = redis.GetDatabase();
     private const string TokenCacheKey = "poleemploi:access_token";
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public async Task<string> GetAccessTokenAsync()
     {
-        var token = await _db.StringGetAsync(TokenCacheKey);
-        if (!token.IsNullOrEmpty)
-        {
-            return token!;
-        }
-
-        var clientId = _settings.Value.ClientId;
-        var clientSecret = _settings.Value.ClientSecret;
-
-        var content = new FormUrlEncodedContent(
-        [
-            new KeyValuePair<string, string>("grant_type", "client_credentials"),
-            new KeyValuePair<string, string>("client_id", clientId),
-            new KeyValuePair<string, string>("client_secret", clientSecret),
-            new KeyValuePair<string, string>("scope", "api_offresdemploiv2 o2dsoffre")
-        ]);
-
+        await _semaphore.WaitAsync();
+        
         try
         {
+            var token = await _db.StringGetAsync(TokenCacheKey);
+            if (!token.IsNullOrEmpty)
+            {
+                return token!;
+            }
+
+            var clientId = _settings.Value.ClientId;
+            var clientSecret = _settings.Value.ClientSecret;
+
+            var content = new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                new KeyValuePair<string, string>("client_id", clientId),
+                new KeyValuePair<string, string>("client_secret", clientSecret),
+                new KeyValuePair<string, string>("scope", "api_offresdemploiv2 o2dsoffre")
+            ]);
             var response = await _retryPolicy.ExecuteAsync(() =>
                 _httpClient.PostAsync("https://entreprise.pole-emploi.fr/connexion/oauth2/access_token?realm=/partenaire", content)
             );
@@ -48,6 +50,8 @@ internal class PoleEmploiTokenService(ILogger logger, IOptions<PoleEmploiSetting
             if (!response.IsSuccessStatusCode)
             {
                 _logger.Error("Erreur lors de l'obtention du token Pôle Emploi : {Code}", response.StatusCode);
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.Error("Réponse erreur Pôle Emploi : {Content}", errorContent);
                 throw new ApplicationException("Échec d'authentification avec Pôle Emploi.");
             }
 
@@ -61,6 +65,10 @@ internal class PoleEmploiTokenService(ILogger logger, IOptions<PoleEmploiSetting
         {
             _logger.Error(ex, ex.Message);
             throw;
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 

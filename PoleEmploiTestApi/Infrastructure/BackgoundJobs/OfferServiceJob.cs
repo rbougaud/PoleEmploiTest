@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Dtos;
+using Domain.Entities;
 using Hangfire;
 using Infrastructure.Abstraction;
 using Infrastructure.Abstraction.Repositories;
@@ -15,10 +16,17 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
     private readonly IPoleEmploiApiClient _apiClient = apiClient;
     private readonly IJobOfferRepositoryReader _repositoryReader = repositoryReader;
     private readonly IJobOfferRepositoryWriter _repositoryWriter = repositoryWriter;
-    private static readonly string[] _cities = ["Rennes"]; //, "Paris", "Bordeaux" //TODO RBO voir si à mettre en BDD dans une table Commune pour celles qui sont suivies
+    //TODO RBO voir si à mettre en BDD dans une table Commune pour celles qui sont suivies
+    private static readonly Dictionary<string, string> _cities = new()
+    {
+        ["VILLIERS LE DUC"] = "21704",
+        //["Paris"] = "75056",
+        //["Rennes"] = "",
+        ["Bordeaux"] = "33063"
+    };
 
-    //[AutomaticRetry(Attempts = 3, DelaysInSeconds = new int[] { 60, 300, 600 }, LogEvents = true)]
     [DisableConcurrentExecution(timeoutInSeconds: 300)]
+    [AutomaticRetry(Attempts = 3, DelaysInSeconds = new int[] { 60, 300, 600 }, LogEvents = true)]
     public async Task ImportOffersAsync(CancellationToken cancellationToken = default)
     {
         _logger.Information("Lancement de l'import");
@@ -26,24 +34,24 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
         {
             try
             {
-                var json = await _apiClient.SearchOffresAsync(city);
+                var json = await _apiClient.SearchOffresAsync(city.Value);
                 if (!json.IsSuccess) { continue; }
-
-                var searchResult = JsonSerializer.Deserialize<ApiSearchResponse>(json.Value);
-                if (searchResult?.Resultats is null || searchResult.Resultats.Count == 0)
+                _logger.Debug(json.Value);
+                var searchResult = JsonSerializer.Deserialize<RootObject>(json.Value);
+                if (searchResult?.Resultats is not { Count: > 0 })
                 {
                     continue;
                 }
 
                 var validOffers = searchResult.Resultats
-                    .Where(o => !string.IsNullOrEmpty(o.Titre) && !string.IsNullOrEmpty(o.OrigineOffre?.Url))
+                    .Where(o => !string.IsNullOrEmpty(o.Intitule) && !string.IsNullOrEmpty(o.OrigineOffre?.UrlOrigine))
                     .ToList();
 
                 if (validOffers.Count == 0)
                 {
                     continue;
                 }
-                var keys = validOffers.Select(o => (o.Titre!, o.OrigineOffre!.Url!)).ToList();
+                var keys = validOffers.Select(o => (o.Intitule!, o.OrigineOffre!.UrlOrigine!)).ToList();
                 var existingOffers = await _repositoryReader.GetExistingOffers(keys, cancellationToken);
 
                 var now = DateTime.UtcNow;
@@ -52,7 +60,7 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
 
                 foreach (var offre in validOffers)
                 {
-                    var key = (offre.Titre!, offre.OrigineOffre!.Url!);
+                    var key = (offre.Intitule!, offre.OrigineOffre!.UrlOrigine!);
 
                     if (existingOffers.TryGetValue(key, out var existingOffer))
                     {
@@ -63,12 +71,12 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
                         newOffers.Add(new JobOffer
                         {
                             Id = Guid.CreateVersion7(),
-                            Title = offre.Titre!,
+                            Title = offre.Intitule!,
                             Description = offre.Description ?? string.Empty,
-                            Url = offre.OrigineOffre.Url!,
-                            ContractType = offre.Contrat ?? "Inconnu",
+                            Url = offre.OrigineOffre.UrlOrigine!,
+                            ContractType = offre.TypeContrat ?? "Inconnu",
                             Company = offre.Entreprise?.Nom ?? "Inconnue",
-                            City = offre.LieuTravail?.Libelle ?? city,
+                            City = offre.LieuTravail?.Libelle ?? city.Key,
                             DatePosted = now,
                             LastUpdated = now
                         });
@@ -94,36 +102,6 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
                     city, insertCount, updateCount);
                 _logger.Information("Offres pour {Ville} importées avec succès", city);
 
-                //foreach (var offre in offres.EnumerateArray())
-                //{
-                //    var id = Guid.CreateVersion7(); // ou autre ID stable si fourni
-                //    var titre = offre.GetProperty("intitule").GetString();
-                //    var description = offre.GetProperty("description").GetString();
-                //    var url = offre.GetProperty("origineOffre").GetProperty("urlOrigine").GetString();
-                //    var contrat = offre.GetProperty("typeContratLibelle").GetString();
-                //    var entreprise = offre.GetProperty("entreprise").GetProperty("nom").GetString();
-                //    var lieu = offre.GetProperty("lieuTravail").GetProperty("libelle").GetString();
-
-                //    // Vérification duplication possible (par titre+ville+url)
-                //    bool exists = await _repositoryReader.CheckIfExist(titre, url, cancellationToken);
-                //    if (exists) { continue; }
-
-                //    var newOffre = new JobOffer
-                //    {
-                //        Id = id,
-                //        Title = titre!,
-                //        Description = description!,
-                //        Url = url!,
-                //        ContractType = contrat ?? "Inconnu",
-                //        Company = entreprise ?? "Inconnue",
-                //        City = lieu ?? city,
-                //        DatePosted = DateTime.UtcNow
-                //    };
-
-                //    await _repositoryWriter.AddAsync(newOffre);
-                //    _logger.Information("Offres pour {Ville} importées avec succès", city);
-                //}
-                //await _repositoryWriter.SaveAsync();
             }
             catch (Exception ex)
             {
@@ -132,39 +110,4 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
             }
         }
     }
-
-    private record ApiSearchResponse(List<ApiJobOffer>? Resultats);
-
-    private class ApiJobOffer
-    {
-        [JsonPropertyName("intitule")]
-        public string? Titre { get; set; }
-
-        [JsonPropertyName("description")]
-        public string? Description { get; set; }
-
-        [JsonPropertyName("typeContratLibelle")]
-        public string? Contrat { get; set; }
-
-        public OrigineOffre? OrigineOffre { get; set; }
-        public Entreprise? Entreprise { get; set; }
-        public LieuTravail? LieuTravail { get; set; }
-    }
-
-    private class OrigineOffre
-    {
-        [JsonPropertyName("urlOrigine")]
-        public string? Url { get; set; }
-    }
-
-    private class Entreprise
-    {
-        public string? Nom { get; set; }
-    }
-
-    private class LieuTravail
-    {
-        public string? Libelle { get; set; }
-    }
-
 }
