@@ -7,7 +7,7 @@ public class JobOffer
     public string Company { get; set; } = default!;
     public string ContractType { get; set; } = default!;
     public string City { get; set; } = default!;
-    public string Country { get; set; } = default!;
+    public string? Country { get; set; }
     public string Description { get; set; } = default!;
     public string Url { get; set; } = default!;
     public DateTime DatePosted { get; set; }

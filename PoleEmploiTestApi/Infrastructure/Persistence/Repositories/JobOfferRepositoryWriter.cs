@@ -49,8 +49,12 @@ internal class JobOfferRepositoryWriter(WriterContext context) : IJobOfferReposi
             ],
             PreserveInsertOrder = false
         };
+
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
         await _context.BulkUpdateAsync(offersToUpdate, bulkConfig, cancellationToken: cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
+
 
     public async Task AddAsync(JobOffer newOffre)
     {

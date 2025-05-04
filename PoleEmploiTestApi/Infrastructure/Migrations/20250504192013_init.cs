@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,7 +20,7 @@ namespace Infrastructure.Migrations
                     Company = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     ContractType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     City = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     Description = table.Column<string>(type: "text", nullable: false),
                     Url = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     DatePosted = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -30,6 +30,12 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_JobOffers", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JobOffers_Title_Url",
+                table: "JobOffers",
+                columns: new[] { "Title", "Url" },
+                unique: true);
         }
 
         /// <inheritdoc />

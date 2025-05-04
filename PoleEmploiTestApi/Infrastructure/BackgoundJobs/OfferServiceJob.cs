@@ -18,9 +18,8 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
     //TODO RBO voir si à mettre en BDD dans une table Commune pour celles qui sont suivies
     private static readonly Dictionary<string, string> _cities = new()
     {
-        ["VILLIERS LE DUC"] = "21704",
-        //["Paris"] = "75056",
-        //["Rennes"] = "",
+        ["Paris"] = "75056",
+        ["Rennes"] = "35238",
         ["Bordeaux"] = "33063"
     };
 
@@ -47,6 +46,7 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
 
                 var validOffers = searchResult.Resultats
                     .Where(o => !string.IsNullOrEmpty(o.Intitule) && !string.IsNullOrEmpty(o.OrigineOffre?.UrlOrigine))
+                    .DistinctBy(o => (o.Intitule, o.OrigineOffre.UrlOrigine))
                     .ToList();
 
                 if (validOffers.Count == 0)
