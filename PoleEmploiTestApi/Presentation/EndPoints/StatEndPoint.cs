@@ -5,6 +5,7 @@ namespace Presentation.EndPoints;
 
 public static class StatEndPoint
 {
+    //TODO RBO add summary
     public static void MapStatEndPoint(this IEndpointRouteBuilder app)
     {
         app.MapGet("/rapport/offers", async (IMessageBus bus) =>

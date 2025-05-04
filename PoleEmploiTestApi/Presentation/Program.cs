@@ -10,6 +10,8 @@ using Scalar.AspNetCore;
 using Serilog;
 using System.Text;
 
+//TODO RBO add comments + remarks
+//Add unit & integration tests
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
@@ -22,7 +24,7 @@ try
     var builder = WebApplication.CreateBuilder(args);
     builder.Configuration.AddUserSecrets<Program>();
     builder.Logging.ClearProviders();
-    //TODO RBO OpenTelemetry + Prometheus si tu veux aller très loin
+    //TODO RBO OpenTelemetry + Prometheus ?
     builder.Host.UseSerilog((context, cfg) =>
     {
         cfg.Enrich.FromLogContext()

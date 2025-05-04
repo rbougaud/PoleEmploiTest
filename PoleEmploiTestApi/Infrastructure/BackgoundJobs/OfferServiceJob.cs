@@ -18,7 +18,7 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
     //TODO RBO voir si à mettre en BDD dans une table Commune pour celles qui sont suivies
     private static readonly Dictionary<string, string> _cities = new()
     {
-        ["Paris"] = "75056",
+        ["Paris"] = "75056", //TODO RBO code insee non reconnu ?
         ["Rennes"] = "35238",
         ["Bordeaux"] = "33063"
     };
