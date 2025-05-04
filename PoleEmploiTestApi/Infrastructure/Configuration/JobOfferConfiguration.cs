@@ -29,7 +29,6 @@ public class JobOfferConfiguration : IEntityTypeConfiguration<JobOffer>
             .HasMaxLength(100);
 
         builder.Property(x => x.Country)
-            .IsRequired()
             .HasMaxLength(100);
 
         builder.Property(x => x.Description)
@@ -41,5 +40,7 @@ public class JobOfferConfiguration : IEntityTypeConfiguration<JobOffer>
 
         builder.Property(x => x.DatePosted)
             .IsRequired();
+
+        builder.HasIndex(x => new { x.Title, x.Url }).IsUnique();
     }
 }

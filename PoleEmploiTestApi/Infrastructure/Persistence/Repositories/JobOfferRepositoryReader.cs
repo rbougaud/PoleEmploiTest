@@ -20,9 +20,12 @@ internal class JobOfferRepositoryReader(ReaderContext context) : IJobOfferReposi
         var titles = keysToLookup.Select(k => k.Title).Distinct().ToList();
         var urls = keysToLookup.Select(k => k.Url).Distinct().ToList();
 
-        var query = _context.JobOffers
-            .Where(o => titles.Contains(o.Title) && urls.Contains(o.Url));
+        var query = await _context.JobOffers
+            .Where(o => titles.Contains(o.Title) && urls.Contains(o.Url))
+            .ToListAsync(cancellationToken);
 
-        return await query.ToDictionaryAsync(o => (o.Title, o.Url),o => o, cancellationToken);
+        return query
+            .DistinctBy(o => (o.Title, o.Url))
+            .ToDictionary(o => (o.Title, o.Url), o => o);
     }
 }

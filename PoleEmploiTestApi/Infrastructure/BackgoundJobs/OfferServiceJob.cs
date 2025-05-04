@@ -35,7 +35,6 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
             {
                 var json = await _apiClient.SearchOffresAsync(city.Value);
                 if (!json.IsSuccess) { continue; }
-                _logger.Debug(json.Value);
                 var options = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
