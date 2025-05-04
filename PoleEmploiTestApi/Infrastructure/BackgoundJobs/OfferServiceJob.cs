@@ -1,9 +1,9 @@
-﻿using Application.Dtos;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Hangfire;
 using Infrastructure.Abstraction;
 using Infrastructure.Abstraction.Repositories;
 using Serilog;
+using Shared.Dtos;
 using System.Text.Json;
 
 namespace Infrastructure.BackgoundJobs;

@@ -1,8 +1,8 @@
-﻿using Application.Dtos;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Infrastructure.Abstraction.Repositories;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Shared.Dtos;
 
 namespace Infrastructure.Persistence.Repositories;
 

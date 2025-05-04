@@ -11,7 +11,7 @@ internal class PoleEmploiApiClient(ILogger logger, IConnectionMultiplexer redis,
 {
     private readonly HttpClient _httpClient = httpClient;
     private readonly ILogger _logger = logger;
-    private readonly IDatabase _database = redis.GetDatabase();
+    private readonly IDatabase _database = redis.GetDatabase(); //TODO RBO
     private readonly IPoleEmploiTokenService _tokenService = tokenService;
     private const string _urlBase = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
 

@@ -1,4 +1,4 @@
-﻿namespace Application.Dtos;
+﻿namespace Shared.Dtos;
 
 public record OfferStatDto
 {

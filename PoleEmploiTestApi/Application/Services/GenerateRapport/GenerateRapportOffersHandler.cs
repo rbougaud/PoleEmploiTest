@@ -20,7 +20,7 @@ public class GenerateRapportOffersHandler(ILogger logger, IJobOfferRepositoryRea
         using var writer = new StreamWriter(fullPath);
 
         writer.WriteLine("Statistiques des Offres Pôle Emploi");
-        writer.WriteLine("=====================================");
+        writer.WriteLine("");
         foreach (var stat in stats)
         {
             var line = $"Contrat: {stat.ContractType,-20} | Entreprise: {stat.Company,-30} | Pays: {stat.Country,-15} | Nombre: {stat.Count}";

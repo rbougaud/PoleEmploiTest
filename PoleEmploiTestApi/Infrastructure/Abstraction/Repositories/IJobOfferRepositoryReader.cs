@@ -1,5 +1,5 @@
-﻿using Application.Dtos;
-using Domain.Entities;
+﻿using Domain.Entities;
+using Shared.Dtos;
 
 namespace Infrastructure.Abstraction.Repositories;
 

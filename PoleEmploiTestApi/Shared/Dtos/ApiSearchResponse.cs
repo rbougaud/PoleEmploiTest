@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Application.Dtos;
+namespace Shared.Dtos;
 
 public record ApiSearchResponse(
     [property: JsonPropertyName("resultats")] List<Offre> Resultats,
