@@ -5,7 +5,6 @@ using Infrastructure.Abstraction;
 using Infrastructure.Abstraction.Repositories;
 using Serilog;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Infrastructure.BackgoundJobs;
 
@@ -37,7 +36,11 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
                 var json = await _apiClient.SearchOffresAsync(city.Value);
                 if (!json.IsSuccess) { continue; }
                 _logger.Debug(json.Value);
-                var searchResult = JsonSerializer.Deserialize<RootObject>(json.Value);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                var searchResult = JsonSerializer.Deserialize<ApiSearchResponse>(json.Value, options);
                 if (searchResult?.Resultats is not { Count: > 0 })
                 {
                     continue;
