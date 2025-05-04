@@ -2,6 +2,7 @@ using Hangfire;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Presentation.EndPoints;
 using Presentation.Extensions;
 using Presentation.Filters;
 using Presentation.Transformers;
@@ -80,7 +81,7 @@ try
     }
 
     app.UseRouting();
-
+    app.MapStatEndPoint();
     app.UseHttpsRedirection();
     app.UseAuthorization();
     //HealthChecks

@@ -67,6 +67,7 @@ public static class DependencyInjection
         {
             settings.AddHealthCheckEndpoint("default", "/healthz");
         }).AddInMemoryStorage();
+
         return services;
     }
 }

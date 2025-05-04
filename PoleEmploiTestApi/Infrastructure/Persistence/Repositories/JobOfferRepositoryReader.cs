@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Dtos;
+using Domain.Entities;
 using Infrastructure.Abstraction.Repositories;
 using Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -27,5 +28,19 @@ internal class JobOfferRepositoryReader(ReaderContext context) : IJobOfferReposi
         return query
             .DistinctBy(o => (o.Title, o.Url))
             .ToDictionary(o => (o.Title, o.Url), o => o);
+    }
+
+    public async Task<List<OfferStatDto>> GetOfferStats(CancellationToken cancellationToken)
+    {
+        return await _context.JobOffers
+            .GroupBy(o => new { o.ContractType, o.Company, o.Country })
+            .Select(g => new OfferStatDto
+            {
+                ContractType = g.Key.ContractType,
+                Company = g.Key.Company,
+                Country = g.Key.Country,
+                Count = g.Count()
+            })
+            .ToListAsync(cancellationToken);
     }
 }
