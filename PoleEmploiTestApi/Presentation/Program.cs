@@ -2,6 +2,7 @@ using Hangfire;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Presentation.Extensions;
 using Presentation.Filters;
 using Presentation.Transformers;
 using Scalar.AspNetCore;
@@ -53,28 +54,28 @@ try
         options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
     });
 
-    builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection")!, builder.Configuration.GetConnectionString("Redis"));
+    builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection")!, builder.Configuration.GetConnectionString("Redis"), builder.Configuration.GetSection("Auth"));
 
     var app = builder.Build();
-
+    app.UseBackgroundJobs();
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
-        app.MapScalarApiReference(options => //scalar/v1
+        app.MapScalarApiReference(options => //rajouter à l'url => scalar/v1
         {
             options
-            .WithTitle("SpotifyTestApi")
+            .WithTitle("PoleEmploiTestApi")
             .WithTheme(ScalarTheme.Moon)
             .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
         });
         app.UseHangfireDashboard("/hangfire", new DashboardOptions
         {
-            AppPath = "/", // retour à l'API root
+            AppPath = "/",
             Authorization = [],
             DashboardTitle = "Spotify Refresh Jobs",
             DisplayStorageConnectionString = false,
-            IsReadOnlyFunc = context => false, // Dashboard interactif
-            StatsPollingInterval = 2000, // refresh toutes les 2 secondes
+            IsReadOnlyFunc = context => false,
+            StatsPollingInterval = 2000,
         });
     }
 

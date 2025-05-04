@@ -1,7 +1,13 @@
 ﻿using Hangfire;
 using Hangfire.PostgreSql;
 using Hangfire.Redis.StackExchange;
+using Infrastructure.Abstraction;
+using Infrastructure.Abstraction.Repositories;
+using Infrastructure.BackgoundJobs;
+using Infrastructure.Configuration;
+using Infrastructure.ExternalServices;
 using Infrastructure.Persistence.Contexts;
+using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,9 +18,10 @@ namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString, string? redisConnectionString)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString, string? redisConnectionString, IConfigurationSection configurationSection)
     {
         services.TryAddSingleton<Serilog.ILogger>();
+        services.Configure<PoleEmploiSettings>(configurationSection);
         services.AddDbContext<WriterContext>(options =>
         {
             options.UseNpgsql(connectionString, npgsqlOptions =>
@@ -23,6 +30,9 @@ public static class DependencyInjection
             });
         });
         services.AddDbContext<ReaderContext>(options => options.UseNpgsql(connectionString).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+
+        services.AddScoped<IJobOfferRepositoryWriter, JobOfferRepositoryWriter>();
+        services.AddScoped<IJobOfferRepositoryReader, JobOfferRepositoryReader>();
 
         // Redis
         services.AddSingleton<IConnectionMultiplexer>(sp =>
@@ -47,9 +57,12 @@ public static class DependencyInjection
             });
         });
         services.AddHangfireServer();
+        services.AddScoped<IOfferServiceJob, OfferServiceJob>();
 
+        services.AddSingleton<IPoleEmploiTokenService, PoleEmploiTokenService>();
+        services.AddHttpClient<IPoleEmploiTokenService, PoleEmploiTokenService>();
+        services.AddHttpClient<IPoleEmploiApiClient, PoleEmploiApiClient>();
         services.AddHealthChecks().AddNpgSql(connectionString).AddRedis(redisConnectionStringForHangfire!);
-
         services.AddHealthChecksUI(setupSettings: settings =>
         {
             settings.AddHealthCheckEndpoint("default", "/healthz");

@@ -11,5 +11,6 @@ public class JobOffer
     public string Description { get; set; } = default!;
     public string Url { get; set; } = default!;
     public DateTime DatePosted { get; set; }
+    public DateTime LastUpdated { get; set; }
 }
 

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Contexts;
 
-public class ReaderContext(DbContextOptions<WriterContext> options) : DbContext(options)
+public class ReaderContext(DbContextOptions<ReaderContext> options) : DbContext(options)
 {
     public DbSet<JobOffer> JobOffers { get; set; }
 
