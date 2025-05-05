@@ -30,7 +30,7 @@ internal class JobOfferRepositoryReader(ReaderContext context) : IJobOfferReposi
             .ToDictionary(o => (o.Title, o.Url), o => o);
     }
 
-    public async Task<List<OfferStatDto>> GetOfferStats(CancellationToken cancellationToken)
+    public async Task<List<OfferStatDto>> GetOfferStats(CancellationToken cancellationToken) //TODO Voir si creation de view en BDD
     {
         return await _context.JobOffers
             .GroupBy(o => new { o.ContractType, o.Company, o.Country })

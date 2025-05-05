@@ -5,6 +5,7 @@ using Infrastructure.Abstraction.Repositories;
 using Serilog;
 using Shared.Dtos;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Infrastructure.BackgoundJobs;
 
@@ -66,6 +67,10 @@ internal class OfferServiceJob(ILogger logger, IPoleEmploiApiClient apiClient, I
 
                     if (existingOffers.TryGetValue(key, out var existingOffer))
                     {
+                        existingOffer.Description = offre.Description ?? string.Empty;
+                        existingOffer.ContractType = offre.TypeContrat ?? "Inconnu";
+                        existingOffer.Company = offre.Entreprise?.Nom ?? "Inconnue";
+                        existingOffer.City = offre.LieuTravail?.Libelle ?? city.Key;
                         offersToUpdate.Add(existingOffer);
                     }
                     else
